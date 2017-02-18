@@ -21,7 +21,7 @@ def url_postdata(requrl, data_unencoded):
     return urllib.request.urlopen(req).read().decode()
 
 def api_request(params, data = None):
-    return url_readstr(API_HOST + params + '' if (data == None) else ('?' + urllib.parse.urlencode(data)) )
+    return url_readstr(API_HOST + params + ('' if (data == None) else ('?' + urllib.parse.urlencode(data))))
 
 def api_post(params, data):
     return url_postdata(API_HOST + params, data)
@@ -36,7 +36,7 @@ GET_CLASSIFY_FILTER = '/classify/filter.json' # 获取作品分类
 GET_LIST_BY_CLASSIFY_FILTER = '/classify/{filter}/{sort}/{page}.json' # 获取分类下的列表 (多分类使用'-'作分隔符相连，例如'1-2-3-4') sort: 0 人气；1 更新
 
 SUBSCRIBE = {
-    'read' : '/subscribe/read?uid={uid}&obj_id={obj_id}&type=mh', # 阅读
+    'read' : '/subscribe/read', # 阅读
     'add' : '/subscribe/add', # 订阅 (POST)
     'cancel' : '/subscribe/cancel' # 退订
 }
@@ -59,7 +59,7 @@ COMMENT = {
     'total' : '/old/comment/total/0/{obj_id}.json', # 获取漫画评论总数
     'list' : '/old/comment/0/{sort}/{obj_id}/{page}.json', # 获取漫画评论 sort: 0 人气；1 更新
     'add' : '/old/comment/add', # 添加漫画评论 (POST)
-    'agree' : '/old/comment/agree?obj_id={obj_id}&comment_id={comment_id}&type={type}' # 点赞漫画评论
+    'agree' : '/old/comment/agree' # 点赞漫画评论
 }
 
 '''接口'''
@@ -79,7 +79,7 @@ def list_get_by_classify_filter(filter, sort, page = 0):
     return api_request(GET_LIST_BY_CLASSIFY_FILTER.format(filter = filter, sort = sort, page = page))
 
 def subscribe_read(obj_id, uid):
-    return api_request(SUBSCRIBE['read'].format(uid = uid, obj_id = obj_id))
+    return api_request(SUBSCRIBE['read'], {'obj_id':obj_id, 'uid':uid, 'type':'mh'})
 
 def subscribe_add(obj_id, uid):
     return api_post(SUBSCRIBE['add'], {'obj_ids':obj_id, 'uid':uid, 'type':'mh'})
@@ -113,7 +113,7 @@ def comic_comments_add(uid, avatar_url, nickname, obj_id, content, to_comment_id
         })
 
 def comic_comments_agree(obj_id, comment_id, type = 0):
-    return api_request(COMMENT['agree'].format(obj_id = obj_id, comment_id = comment_id, type = type))
+    return api_request(COMMENT['agree'], {'obj_id':obj_id, 'comment_id':comment_id, 'type':type})
 
 def chapter_get(obj_id, chapter_id):
     return api_request(GET_CHAPTER.format(obj_id = obj_id, chapter_id = chapter_id))
