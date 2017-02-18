@@ -31,10 +31,20 @@ def api_post(params, data):
 API_HOST = 'http://v2.api.dmzj.com' # 动漫之家 API 主机
 GET_LATEST = '/latest/{type}/{page}.json' # 获取最新漫画 type: 100=全部, 0=译制漫画, 1=原创漫画
 GET_RECOMMEND = '/recommend.json' # 获取首页推荐
+GET_RECOMMEND_BATCH_UPDATE = '/recommend/batchUpdate' # 根据用户获取首页推荐 uid: 用户id, category_id: 分类id，详情请看调用函数
 GET_TYPE_FILTER = '/rank/type_filter.json' # 获取分区列表
 GET_CLASSIFY_FILTER = '/classify/filter.json' # 获取作品分类
 GET_LIST_BY_CLASSIFY_FILTER = '/classify/{filter}/{sort}/{page}.json' # 获取分类下的列表 (多分类使用'-'作分隔符相连，例如'1-2-3-4') sort: 0 人气；1 更新
-
+SUBJECT = {
+    'list' : '/subject/{subject}/{page}.json', # 获取专题列表
+    'info' : '/subject/{id}.json', # 获取专题信息
+    'comment' : {
+        'total' : '/comment/total/2/{id}.json', # 获取专题评论总数
+        'list' : '/comment/2/{sort}/{id}/{page}.json', # 获取专题评论 sort: 0 人气；1 更新
+        'add' : '/comment/add', # 添加专题评论 (POST)
+        'agree' : '/comment/agree' # 点赞专题评论
+    }
+}
 SUBSCRIBE = {
     'read' : '/subscribe/read', # 阅读
     'add' : '/subscribe/add', # 订阅 (POST)
@@ -69,6 +79,10 @@ def latest_get(page, type = 100):
 def recommend_get():
     return api_request(GET_RECOMMEND)
 
+def recommend_get_by_uid(uid, category_id):
+    #category_id: 46 大图推荐(Banner); 47 近期必看; 48 火热专题; 49 我的订阅; 50 猜你喜欢; 51 大师级作者怎能不看; 52 国漫也精彩; 53 美漫大事件; 54 热门连载; 55 条漫专区
+    return api_request(GET_RECOMMEND_BATCH_UPDATE, {'uid':uid, 'category_id':category_id})
+
 def type_filter_get():
     return api_request(GET_TYPE_FILTER)
 
@@ -77,6 +91,27 @@ def classify_filter_get():
 
 def list_get_by_classify_filter(filter, sort, page = 0):
     return api_request(GET_LIST_BY_CLASSIFY_FILTER.format(filter = filter, sort = sort, page = page))
+
+def subject_get(page, subject = 0):
+    return api_request(SUBJECT['list'].format(subject = subject, page = page))
+
+def subject_info_get(id):
+    return api_request(SUBJECT['info'].format(id = id))
+
+def subject_comment_total(id):
+    return api_request(SUBJECT['comment']['total'].format(id = id))
+
+def subject_comment_list(id, sort, page = 0):
+    return api_request(SUBJECT['comment']['list'].format(id = id, sort = sort, page = page))
+
+def subject_comment_add(id, sender_uid, content, to_comment_id = 0, to_uid = 0, origin_comment_id = 0, type = 2):
+    return api_post(SUBJECT['comment']['add'], {
+        'obj_id':id, 'to_comment_id':to_comment_id, 'to_uid':to_uid, 'origin_comment_id': origin_comment_id,
+        'sender_uid':sender_uid, 'type':type, 'content':content
+    })
+
+def subject_comment_agree(id, comment_id, type = 2):
+    return api_request(SUBJECT['comment']['agree'], {'obj_id':id, 'comment_id':comment_id, 'type':type})
 
 def subscribe_read(obj_id, uid):
     return api_request(SUBSCRIBE['read'], {'obj_id':obj_id, 'uid':uid, 'type':'mh'})
@@ -164,7 +199,21 @@ def main():
         print(comic_comments_add(uid = input('【添加漫画评论】请输入你的用户id：'), nickname = input('请输入你的用户昵称：'), obj_id = input('请输入要评论的漫画编号：'),
         avatar_url = input('请输入你的头像地址：'), content = input('请输入评论内容：')))
     if choice == '14':
-        print(comic_comments_agree(input('【点赞漫画评论】请输入漫画编号：'), input('请输入评论编号：'), 0))
+        print(comic_comments_agree(input('【点赞漫画评论】请输入漫画编号：'), input('请输入评论编号：')))
+    if choice == '15':
+        print(recommend_get_by_uid(input('【根据用户获取推荐】用户id：'), input('分类id：')))
+    if choice == '16':
+        print(subject_get(input('【获取专题】页码：'), input('专题类型：')))
+    if choice == '17':
+        print(subject_info_get(input('【获取专题信息】专题编号：')))
+    if choice == '18':
+        print(subject_comment_total(input('【获取专题评论总数】专题编号：')))
+    if choice == '19':
+        print(subject_comment_list(input('【获取专题评论列表】专题编号'), input('0、人气，1、更新：'), input('页码：')))
+    if choice == '20':
+        print(subject_comment_add(sender_uid = input('【添加专题评论】请输入你的用户id：'), id = input('请输入要评论的专题编号：'), content = input('请输入评论内容：')))
+    if choice == '21':
+        print(subject_comment_agree(input('【点赞专题评论】请输入专题编号：'), input('请输入评论编号：')))
     if choice == '100':
         print(ucenter_author_get(input('【获取作者】作者编号：')))
     if choice == '101':
