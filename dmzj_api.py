@@ -35,6 +35,7 @@ GET_RECOMMEND_BATCH_UPDATE = '/recommend/batchUpdate' # 根据用户获取首页
 GET_TYPE_FILTER = '/rank/type_filter.json' # 获取分区列表
 GET_CLASSIFY_FILTER = '/classify/filter.json' # 获取作品分类
 GET_LIST_BY_CLASSIFY_FILTER = '/classify/{filter}/{sort}/{page}.json' # 获取分类下的列表 (多分类使用'-'作分隔符相连，例如'1-2-3-4') sort: 0 人气；1 更新
+GET_LIST_BY_RANK = '/rank/0/{time}/{sort}/{page}.json' # 获取排行 time: 0=日, 1=周, 2=月, 3=总  sort: 0=人气排行, 1=吐槽排行, 2=订阅排行
 SUBJECT = {
     'list' : '/subject/{subject}/{page}.json', # 获取专题列表
     'info' : '/subject/{id}.json', # 获取专题信息
